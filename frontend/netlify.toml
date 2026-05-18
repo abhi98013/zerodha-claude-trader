@@ -4,7 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  VITE_API_URL = "https://delirious-ambiguity-willing.ngrok-free.dev"
+  VITE_API_URL = "https://zerodha-claude-trader-backend.onrender.com"
 
 [[redirects]]
   from = "/*"
