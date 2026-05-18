@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: zerodha-claude-trader-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PAPER_TRADE
+        value: "true"
+      - key: ZERODHA_API_KEY
+        sync: false
+      - key: ZERODHA_API_SECRET
+        sync: false
+      - key: ZERODHA_USER_ID
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: RISK_PER_TRADE
+        value: "1.0"
+      - key: MAX_DAILY_LOSS
+        value: "3.0"
+      - key: DEFAULT_LOT_SIZE
+        value: "500"
+      - key: FRONTEND_URL
+        value: "https://zc-trader-dashboard.netlify.app"

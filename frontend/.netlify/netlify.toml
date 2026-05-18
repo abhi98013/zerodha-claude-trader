@@ -1,0 +1,41 @@
+redirectsOrigin = "config"
+plugins = []
+headers = []
+
+[functions]
+
+[functions."*"]
+
+[build]
+publish = "C:\\Users\\Lenovo\\CascadeProjects\\zerodha-claude-trader\\frontend\\build"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "npm install && npm run build"
+
+[build.environment]
+NODE_VERSION = "20"
+VITE_API_URL = "https://delirious-ambiguity-willing.ngrok-free.dev"
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
