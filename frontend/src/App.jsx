@@ -12,7 +12,7 @@ import {
   getHealth, getAuthStatus, getQuotes, analyzeAll,
   executeTrade, squareoffAll, getTradeHistory, getOpenPositions,
   getRiskStats, startBot, stopBot, getBotStatus, resetDaily,
-  createSession, getOHLCV, strategyScan, getSectors, runBacktest, getLoginUrl
+  createSession, getOHLCV, strategyScan, getSectors, runBacktest, getLoginUrl, getRecommendations
 } from './api';
 
 const SYMBOLS = ['RELIANCE', 'INFY', 'TCS', 'HDFCBANK', 'ICICIBANK'];
@@ -248,7 +248,9 @@ export default function App() {
   const [strategyLoading, setStrategyLoading] = useState(false);
   const [btData, setBtData] = useState(null);
   const [btLoading, setBtLoading] = useState(false);
-  const [btYears, setBtYears] = useState([2015, 2024]);
+  const [btYears, setBtYears] = useState([2015, 2026]);
+  const [recData, setRecData] = useState(null);
+  const [recLoading, setRecLoading] = useState(false);
 
   const notify = (msg, type = 'info') => {
     const id = Date.now();
@@ -357,12 +359,24 @@ export default function App() {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
     { id: 'strategy', label: 'NSE Strategy', icon: Target },
+    { id: 'recommendations', label: '🎯 Recommendations', icon: ArrowUpRight },
     { id: 'backtest', label: 'Backtest', icon: BarChart2 },
     { id: 'signals', label: 'AI Signals', icon: Zap },
     { id: 'chart', label: 'Charts', icon: Clock },
     { id: 'trades', label: 'Trades', icon: DollarSign },
     { id: 'settings', label: 'Settings', icon: Shield },
   ];
+
+  const loadRecs = async () => {
+    setRecLoading(true);
+    try {
+      const r = await getRecommendations();
+      setRecData(r.data);
+    } catch(e) { notify('Failed to load recommendations', 'error'); }
+    finally { setRecLoading(false); }
+  };
+
+  useEffect(() => { if (activeTab === 'recommendations' && !recData) loadRecs(); }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -887,6 +901,162 @@ export default function App() {
                 </div>
                 <ChartPanel symbol={selectedSymbol} />
                 <div className="mt-3 text-xs text-slate-500 text-center">Last 40 candles (5-min interval) — Click a symbol above to switch</div>
+              </div>
+            )}
+
+            {/* Recommendations Tab */}
+            {activeTab === 'recommendations' && (
+              <div className="flex flex-col gap-5">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h2 className="text-base font-bold text-white flex items-center gap-2"><ArrowUpRight size={16} className="text-emerald-400" /> Trade Recommendations</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Backtest-scored picks (2015–2026) with exact entry, strike, stop-loss & target</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {recData && <span className="text-xs text-slate-500">Generated: {recData.generated_at}</span>}
+                    <button onClick={loadRecs} disabled={recLoading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 transition-colors">
+                      <RefreshCw size={12} className={recLoading ? 'animate-spin' : ''} />
+                      {recLoading ? 'Scanning...' : 'Refresh'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Summary pills */}
+                {recData && (
+                  <div className="flex gap-3 flex-wrap">
+                    <div className="glass rounded-lg px-4 py-2 text-center">
+                      <div className="text-lg font-bold text-white">{recData.total}</div>
+                      <div className="text-xs text-slate-400">Total Picks</div>
+                    </div>
+                    <div className="glass rounded-lg px-4 py-2 text-center border border-emerald-500/30">
+                      <div className="text-lg font-bold text-emerald-400">{recData.high_prob_count}</div>
+                      <div className="text-xs text-slate-400">≥80% Win Prob</div>
+                    </div>
+                    <div className="glass rounded-lg px-4 py-2 text-center">
+                      <div className="text-lg font-bold text-blue-400">{recData.recommendations?.filter(r=>r.option_type==='CE').length || 0}</div>
+                      <div className="text-xs text-slate-400">BUY CE (Bullish)</div>
+                    </div>
+                    <div className="glass rounded-lg px-4 py-2 text-center">
+                      <div className="text-lg font-bold text-red-400">{recData.recommendations?.filter(r=>r.option_type==='PE').length || 0}</div>
+                      <div className="text-xs text-slate-400">BUY PE (Bearish)</div>
+                    </div>
+                  </div>
+                )}
+
+                {recLoading && <div className="flex items-center justify-center py-24 text-slate-400 text-sm animate-pulse">Scanning live NSE data & scoring with backtest engine...</div>}
+
+                {!recLoading && recData?.recommendations?.length === 0 && (
+                  <div className="glass rounded-xl p-10 text-center text-slate-400 text-sm">No high-confidence setups right now. Market may be sideways — check back after 9:30 AM.</div>
+                )}
+
+                {!recLoading && recData?.recommendations?.map(rec => (
+                  <div key={rec.symbol + rec.strike + rec.option_type}
+                    className={`glass rounded-xl p-5 border ${
+                      rec.grade === 'A+' ? 'border-emerald-500/50' :
+                      rec.grade === 'A'  ? 'border-emerald-500/30' :
+                      rec.grade === 'B+' ? 'border-blue-500/30' :
+                                          'border-slate-700/40'
+                    }`}>
+
+                    {/* Header row */}
+                    <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`text-lg font-black px-3 py-1 rounded-lg ${
+                          rec.grade === 'A+' ? 'bg-emerald-500/20 text-emerald-300' :
+                          rec.grade === 'A'  ? 'bg-emerald-500/10 text-emerald-400' :
+                          rec.grade === 'B+' ? 'bg-blue-500/10 text-blue-300' :
+                                              'bg-slate-700 text-slate-300'
+                        }`}>{rec.grade}</div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <TVLink symbol={rec.symbol} className="text-white font-bold text-base hover:text-blue-400">{rec.symbol}</TVLink>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                              rec.option_type === 'CE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                            }`}>{rec.option_type === 'CE' ? '▲ CALL' : '▼ PUT'}</span>
+                            <span className="text-xs text-slate-400">#{rec.rank}</span>
+                          </div>
+                          <div className="text-xs text-slate-400 mt-0.5">{rec.sector} · Signal Score: <span className="text-white font-semibold">{rec.signal_score}/100</span></div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-2xl font-black ${
+                          rec.win_probability >= 80 ? 'text-emerald-400' : rec.win_probability >= 70 ? 'text-blue-400' : 'text-slate-300'
+                        }`}>{rec.win_probability}%</div>
+                        <div className="text-xs text-slate-400">Win Probability</div>
+                      </div>
+                    </div>
+
+                    {/* Trade action banner */}
+                    <div className={`rounded-lg px-4 py-3 mb-4 text-sm font-bold ${
+                      rec.option_type === 'CE' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300' : 'bg-red-500/10 border border-red-500/30 text-red-300'
+                    }`}>
+                      📌 {rec.action} · Expiry: {rec.expiry}
+                    </div>
+
+                    {/* Key numbers grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                      <div className="bg-slate-800/60 rounded-lg p-3">
+                        <div className="text-xs text-slate-400 mb-1">Underlying Price</div>
+                        <div className="text-sm font-bold text-white">₹{rec.underlying_price.toFixed(2)}</div>
+                      </div>
+                      <div className="bg-slate-800/60 rounded-lg p-3">
+                        <div className="text-xs text-slate-400 mb-1">Strike Price</div>
+                        <div className="text-sm font-bold text-yellow-300">₹{rec.strike}</div>
+                      </div>
+                      <div className="bg-slate-800/60 rounded-lg p-3">
+                        <div className="text-xs text-slate-400 mb-1">Entry Premium</div>
+                        <div className="text-sm font-bold text-blue-300">₹{rec.entry_premium}</div>
+                      </div>
+                      <div className="bg-slate-800/60 rounded-lg p-3">
+                        <div className="text-xs text-slate-400 mb-1">Lot Size</div>
+                        <div className="text-sm font-bold text-white">{rec.lot_size.toLocaleString()}</div>
+                      </div>
+                    </div>
+
+                    {/* SL / Target / RR */}
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-center">
+                        <div className="text-xs text-red-400 mb-1 font-medium">🛑 STOP LOSS</div>
+                        <div className="text-base font-black text-red-300">₹{rec.stop_loss_premium}</div>
+                        <div className="text-xs text-red-400/70">-₹{rec.sl_points} / unit</div>
+                        <div className="text-xs text-red-400 font-semibold mt-1">Max Loss: ₹{rec.max_loss.toLocaleString()}</div>
+                      </div>
+                      <div className="bg-slate-800/60 border border-slate-700 rounded-lg p-3 text-center">
+                        <div className="text-xs text-slate-400 mb-1 font-medium">📊 R:R RATIO</div>
+                        <div className="text-base font-black text-white">{rec.rr_ratio} : 1</div>
+                        <div className="text-xs text-slate-500">Risk/Reward</div>
+                        <div className="text-xs text-slate-400 font-semibold mt-1">Capital: ₹{rec.capital_required.toLocaleString()}</div>
+                      </div>
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-center">
+                        <div className="text-xs text-emerald-400 mb-1 font-medium">🎯 TARGET</div>
+                        <div className="text-base font-black text-emerald-300">₹{rec.target_premium}</div>
+                        <div className="text-xs text-emerald-400/70">+₹{rec.target_points} / unit</div>
+                        <div className="text-xs text-emerald-400 font-semibold mt-1">Max Profit: ₹{rec.max_profit.toLocaleString()}</div>
+                      </div>
+                    </div>
+
+                    {/* Supporting data row */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                      <div className="text-xs text-slate-400">Delivery %: <span className="text-white font-semibold">{rec.delivery_pct}%</span></div>
+                      <div className="text-xs text-slate-400">Turnover: <span className="text-white font-semibold">₹{rec.turnover_cr}Cr</span></div>
+                      <div className="text-xs text-slate-400">Sector Chg: <span className={rec.sector_change_pct >= 0 ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold'}>{rec.sector_change_pct > 0 ? '+' : ''}{rec.sector_change_pct}%</span></div>
+                      <div className="text-xs text-slate-400">5-min Low: <span className={rec.five_min_low_held ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold'}>{rec.five_min_low_held ? '✅ Holding' : '❌ Broken'}</span></div>
+                    </div>
+
+                    {/* EV + timing */}
+                    <div className="flex items-center justify-between flex-wrap gap-2 pt-3 border-t border-slate-800">
+                      <div className="text-xs text-slate-400">
+                        ⏰ Entry: <span className="text-white">{rec.entry_time}</span> &nbsp;|&nbsp;
+                        Exit: <span className="text-white">{rec.exit_time}</span>
+                      </div>
+                      <div className={`text-xs font-semibold ${rec.expected_value >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        Expected Value: {rec.expected_value >= 0 ? '+' : ''}₹{rec.expected_value.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-600 mt-2 italic">{rec.basis}</div>
+                  </div>
+                ))}
               </div>
             )}
 

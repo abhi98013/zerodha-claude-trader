@@ -31,6 +31,7 @@ export const startBot = () => api.post('/bot/start');
 export const stopBot = () => api.post('/bot/stop');
 export const updateWatchlist = (symbols) => api.put('/bot/watchlist', { symbols });
 
+export const getRecommendations = () => api.get('/strategy/recommendations');
 export const strategyScan = (force = false) => api.get(`/strategy/scan?force=${force}`);
 export const getSectors = () => api.get('/strategy/sectors');
 export const getFilteredStocks = () => api.get('/strategy/stocks');

@@ -18,6 +18,7 @@ from risk.risk_manager import RiskManager
 from execution.trade_executor import TradeExecutor
 from strategy.strategy_engine import StrategyEngine
 from strategy.backtester import Backtester
+from strategy.recommender import build_recommendations
 
 os.makedirs("logs", exist_ok=True)
 logging.basicConfig(
@@ -444,6 +445,29 @@ def get_option_picks():
         "total": result.get("total_picks", 0),
         "timestamp": datetime.now().isoformat(),
     }
+
+# ── Recommendations Endpoint ────────────────────────────────────────────────
+
+@app.get("/strategy/recommendations")
+def get_recommendations():
+    """Backtest-scored live trade recommendations with strike, SL, target, win probability"""
+    try:
+        sectors = strategy_engine.sector_scanner.get_sector_momentum()
+        top_sectors = strategy_engine.sector_scanner.get_top_sectors(n=5)
+        kite = auth.kite if auth.is_authenticated() else None
+        stocks = strategy_engine.stock_filter.filter_stocks(top_sectors, kite)
+        recs = build_recommendations(stocks, sectors)
+        high_prob = [r for r in recs if r["win_probability"] >= 80]
+        return {
+            "recommendations": recs,
+            "high_probability": high_prob,
+            "total": len(recs),
+            "high_prob_count": len(high_prob),
+            "timestamp": datetime.now().isoformat(),
+            "generated_at": datetime.now().strftime("%d %b %Y %I:%M %p"),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ── Backtest Endpoints ───────────────────────────────────────────────────────
 
