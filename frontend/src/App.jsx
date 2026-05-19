@@ -12,7 +12,7 @@ import {
   getHealth, getAuthStatus, getQuotes, analyzeAll,
   executeTrade, squareoffAll, getTradeHistory, getOpenPositions,
   getRiskStats, startBot, stopBot, getBotStatus, resetDaily,
-  createSession, getOHLCV, strategyScan, getSectors, runBacktest
+  createSession, getOHLCV, strategyScan, getSectors, runBacktest, getLoginUrl
 } from './api';
 
 const SYMBOLS = ['RELIANCE', 'INFY', 'TCS', 'HDFCBANK', 'ICICIBANK'];
@@ -942,12 +942,15 @@ export default function App() {
                     2. Login to Zerodha → copy the <code className="bg-slate-800 px-1 rounded">request_token</code> from redirect URL<br />
                     3. Paste it here and click Create Session
                   </p>
-                  <a href="/auth/login-url" target="_blank" rel="noopener noreferrer"
+                  <a href="#" target="_blank" rel="noopener noreferrer"
                     className="inline-block text-xs text-blue-400 underline mb-3" onClick={async (e) => {
                       e.preventDefault();
-                      const res = await fetch('/auth/login-url');
-                      const d = await res.json();
-                      window.open(d.login_url, '_blank');
+                      try {
+                        const r = await getLoginUrl();
+                        window.open(r.data.login_url, '_blank');
+                      } catch(err) {
+                        notify('Failed to get login URL', 'error');
+                      }
                     }}>
                     → Get Zerodha Login URL
                   </a>

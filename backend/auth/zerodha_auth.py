@@ -19,9 +19,15 @@ class ZerodhaAuth:
             try:
                 from kiteconnect import KiteConnect
                 from config.settings import settings
+                if not settings.ZERODHA_API_KEY:
+                    raise ValueError("ZERODHA_API_KEY is not set in .env")
                 self.kite = KiteConnect(api_key=settings.ZERODHA_API_KEY)
-            except ImportError:
-                logger.warning("kiteconnect not installed, running in paper trade mode")
+                logger.info(f"KiteConnect initialized for user, API key: {settings.ZERODHA_API_KEY[:6]}...")
+            except ImportError as e:
+                logger.error(f"kiteconnect not installed: {e}. Run: pip install kiteconnect")
+                self.paper_trade = True
+            except Exception as e:
+                logger.error(f"KiteConnect init failed: {e}")
                 self.paper_trade = True
 
     def _generate_mock_instruments(self):
