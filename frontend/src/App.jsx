@@ -175,23 +175,30 @@ function ChartPanel({ symbol }) {
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
-    getOHLCV(symbol)
-      .then(res => {
-        const raw = res.data.candles || res.data.data || [];
-        const data = raw.slice(-40).map((d, i) => ({
-          i,
-          price: d.close ? parseFloat(Number(d.close).toFixed(2)) : null,
-          sma20: d.sma_20 ? parseFloat(Number(d.sma_20).toFixed(2)) : null,
-          ema9: d.ema_9 ? parseFloat(Number(d.ema_9).toFixed(2)) : null,
-          label: d.timestamp ? String(d.timestamp).slice(11, 16) : String(i),
-        }));
-        setChartData(data);
-      })
-      .catch(e => setError(e?.response?.data?.detail || e.message || 'Failed to load chart'))
-      .finally(() => setLoading(false));
+    const timer = setTimeout(() => {
+      getOHLCV(symbol)
+        .then(res => {
+          const raw = res.data.candles || res.data.data || [];
+          const data = raw.slice(-40).map((d, i) => ({
+            i,
+            price: d.close ? parseFloat(Number(d.close).toFixed(2)) : null,
+            sma20: d.sma_20 ? parseFloat(Number(d.sma_20).toFixed(2)) : null,
+            ema9: d.ema_9 ? parseFloat(Number(d.ema_9).toFixed(2)) : null,
+            label: d.timestamp ? String(d.timestamp).slice(11, 16) : String(i),
+          }));
+          setChartData(data);
+        })
+        .catch(e => {
+          const msg = e?.response?.data?.detail || e?.response?.statusText || e.message || 'Failed to load chart';
+          const status = e?.response?.status;
+          setError(status === 429 ? 'Rate limited — please wait a moment and click Retry' : msg);
+        })
+        .finally(() => setLoading(false));
+    }, 600);
+    return () => clearTimeout(timer);
   }, [symbol]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { const cancel = load(); return cancel; }, [load]);
 
   if (loading) return <div className="flex items-center justify-center h-40 text-slate-500 text-sm animate-pulse">Loading {symbol} chart...</div>;
   if (error) return (

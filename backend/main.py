@@ -37,6 +37,8 @@ risk_mgr = RiskManager(market_data=market_data)
 executor = TradeExecutor(paper_trade=settings.PAPER_TRADE)
 strategy_engine = StrategyEngine(paper_trade=settings.PAPER_TRADE)
 bot_running = False
+_ohlcv_cache: dict = {}
+_CACHE_TTL = 30
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -226,6 +228,11 @@ def get_quotes():
 
 @app.get("/market/ohlcv/{symbol}")
 def get_ohlcv(symbol: str, interval: str = "5minute", days: int = 2):
+    import time as _time
+    cache_key = f"{symbol.upper()}_{interval}_{days}"
+    cached = _ohlcv_cache.get(cache_key)
+    if cached and (_time.time() - cached["ts"]) < _CACHE_TTL:
+        return cached["data"]
     try:
         df = market_data.get_ohlcv(symbol.upper(), interval, days)
         df = market_data.compute_indicators(df)
@@ -235,17 +242,14 @@ def get_ohlcv(symbol: str, interval: str = "5minute", days: int = 2):
         elif "date" in records.columns:
             records = records.rename(columns={"date": "timestamp"})
         else:
-            records["timestamp"] = records.index.astype(str) if hasattr(records.index, 'astype') else list(range(len(records)))
+            records["timestamp"] = list(range(len(records)))
         candles = records.to_dict("records")
         for c in candles:
             if "timestamp" not in c:
                 c["timestamp"] = str(c.get("Unnamed: 0", ""))
-        return {
-            "success": True,
-            "symbol": symbol.upper(),
-            "candles": candles,
-            "data": candles,
-        }
+        result = {"success": True, "symbol": symbol.upper(), "candles": candles, "data": candles}
+        _ohlcv_cache[cache_key] = {"ts": _time.time(), "data": result}
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
