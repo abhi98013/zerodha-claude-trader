@@ -170,38 +170,51 @@ function TradeRow({ trade, index }) {
 function ChartPanel({ symbol }) {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     setLoading(true);
+    setError(null);
     getOHLCV(symbol)
       .then(res => {
-        const data = res.data.data.slice(-40).map((d, i) => ({
+        const raw = res.data.candles || res.data.data || [];
+        const data = raw.slice(-40).map((d, i) => ({
           i,
-          price: parseFloat(d.close?.toFixed(2) || 0),
-          sma20: d.sma_20 ? parseFloat(d.sma_20.toFixed(2)) : null,
-          ema9: d.ema_9 ? parseFloat(d.ema_9.toFixed(2)) : null,
+          price: d.close ? parseFloat(Number(d.close).toFixed(2)) : null,
+          sma20: d.sma_20 ? parseFloat(Number(d.sma_20).toFixed(2)) : null,
+          ema9: d.ema_9 ? parseFloat(Number(d.ema_9).toFixed(2)) : null,
+          label: d.timestamp ? String(d.timestamp).slice(11, 16) : String(i),
         }));
         setChartData(data);
       })
-      .catch(() => {})
+      .catch(e => setError(e?.response?.data?.detail || e.message || 'Failed to load chart'))
       .finally(() => setLoading(false));
   }, [symbol]);
 
-  if (loading) return <div className="flex items-center justify-center h-40 text-slate-500 text-sm">Loading chart...</div>;
+  useEffect(() => { load(); }, [load]);
+
+  if (loading) return <div className="flex items-center justify-center h-40 text-slate-500 text-sm animate-pulse">Loading {symbol} chart...</div>;
+  if (error) return (
+    <div className="flex flex-col items-center justify-center h-40 gap-2">
+      <p className="text-red-400 text-xs">{error}</p>
+      <button onClick={load} className="text-xs text-blue-400 underline">Retry</button>
+    </div>
+  );
+  if (!chartData.length) return <div className="flex items-center justify-center h-40 text-slate-500 text-sm">No chart data available</div>;
 
   return (
-    <ResponsiveContainer width="100%" height={180}>
+    <ResponsiveContainer width="100%" height={220}>
       <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-        <XAxis dataKey="i" hide />
+        <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#475569' }} interval={7} />
         <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: '#64748b' }} />
         <Tooltip
           contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 11 }}
           labelStyle={{ color: '#94a3b8' }}
         />
-        <Line type="monotone" dataKey="price" stroke="#3b82f6" strokeWidth={2} dot={false} name="Price" />
-        <Line type="monotone" dataKey="sma20" stroke="#f59e0b" strokeWidth={1} dot={false} strokeDasharray="4 2" name="SMA20" />
-        <Line type="monotone" dataKey="ema9" stroke="#10b981" strokeWidth={1} dot={false} strokeDasharray="2 2" name="EMA9" />
+        <Line type="monotone" dataKey="price" stroke="#3b82f6" strokeWidth={2} dot={false} name="Price" connectNulls />
+        <Line type="monotone" dataKey="sma20" stroke="#f59e0b" strokeWidth={1} dot={false} strokeDasharray="4 2" name="SMA20" connectNulls />
+        <Line type="monotone" dataKey="ema9" stroke="#10b981" strokeWidth={1} dot={false} strokeDasharray="2 2" name="EMA9" connectNulls />
       </LineChart>
     </ResponsiveContainer>
   );
