@@ -35,5 +35,5 @@ export const strategyScan = (force = false) => api.get(`/strategy/scan?force=${f
 export const getSectors = () => api.get('/strategy/sectors');
 export const getFilteredStocks = () => api.get('/strategy/stocks');
 export const getOptionPicks = () => api.get('/strategy/options');
-export const runBacktest = (startYear = 2015, endYear = 2024, minScore = 55) =>
+export const runBacktest = (startYear = 2015, endYear = 2026, minScore = 55) =>
   api.get(`/strategy/backtest?start_year=${startYear}&end_year=${endYear}&min_score=${minScore}`);

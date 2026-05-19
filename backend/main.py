@@ -448,7 +448,7 @@ def get_option_picks():
 # ── Backtest Endpoints ───────────────────────────────────────────────────────
 
 @app.get("/strategy/backtest")
-def run_backtest(start_year: int = 2015, end_year: int = 2024, min_score: int = 55):
+def run_backtest(start_year: int = 2015, end_year: int = 2026, min_score: int = 55):
     """Run 10-year strategy backtest and return results with top 5 winners"""
     logger.info(f"Backtest requested: {start_year}–{end_year}")
     bt = Backtester()

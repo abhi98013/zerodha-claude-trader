@@ -38,13 +38,13 @@ MF_HEAVY = {"HINDUNILVR", "ITC", "TCS", "INFY", "HDFCBANK", "RELIANCE",
             "NESTLEIND", "BRITANNIA", "HDFC", "BAJAJFINSV"}
 
 SECTOR_PROFILES = {
-    "NIFTY IT":       {"base_return": 0.18, "volatility": 0.28, "bull_years": [2017, 2019, 2020, 2021, 2023], "bear_years": [2016, 2018, 2022]},
-    "NIFTY BANK":     {"base_return": 0.14, "volatility": 0.32, "bull_years": [2017, 2019, 2021, 2023, 2024], "bear_years": [2016, 2020, 2022]},
-    "NIFTY METAL":    {"base_return": 0.12, "volatility": 0.38, "bull_years": [2016, 2020, 2021, 2023], "bear_years": [2015, 2018, 2019, 2022]},
-    "NIFTY AUTO":     {"base_return": 0.10, "volatility": 0.25, "bull_years": [2017, 2020, 2021, 2024], "bear_years": [2018, 2019, 2022]},
-    "NIFTY PHARMA":   {"base_return": 0.13, "volatility": 0.22, "bull_years": [2015, 2020, 2022, 2024], "bear_years": [2016, 2017, 2021]},
-    "NIFTY REALTY":   {"base_return": 0.16, "volatility": 0.42, "bull_years": [2021, 2023, 2024], "bear_years": [2015, 2016, 2019, 2020]},
-    "NIFTY FMCG":     {"base_return": 0.11, "volatility": 0.15, "bull_years": [2015, 2017, 2019], "bear_years": [2020, 2021, 2022]},
+    "NIFTY IT":       {"base_return": 0.18, "volatility": 0.28, "bull_years": [2017, 2019, 2020, 2021, 2023, 2025], "bear_years": [2016, 2018, 2022, 2026]},
+    "NIFTY BANK":     {"base_return": 0.14, "volatility": 0.32, "bull_years": [2017, 2019, 2021, 2023, 2024, 2025], "bear_years": [2016, 2020, 2022]},
+    "NIFTY METAL":    {"base_return": 0.12, "volatility": 0.38, "bull_years": [2016, 2020, 2021, 2023, 2025], "bear_years": [2015, 2018, 2019, 2022, 2026]},
+    "NIFTY AUTO":     {"base_return": 0.10, "volatility": 0.25, "bull_years": [2017, 2020, 2021, 2024, 2025], "bear_years": [2018, 2019, 2022, 2026]},
+    "NIFTY PHARMA":   {"base_return": 0.13, "volatility": 0.22, "bull_years": [2015, 2020, 2022, 2024, 2025], "bear_years": [2016, 2017, 2021]},
+    "NIFTY REALTY":   {"base_return": 0.16, "volatility": 0.42, "bull_years": [2021, 2023, 2024, 2025], "bear_years": [2015, 2016, 2019, 2020, 2026]},
+    "NIFTY FMCG":     {"base_return": 0.11, "volatility": 0.15, "bull_years": [2015, 2017, 2019, 2025], "bear_years": [2020, 2021, 2022, 2026]},
 }
 
 STOCK_SECTOR_MAP = {
@@ -126,10 +126,10 @@ class Backtester:
         self.trades: List[BacktestTrade] = []
         self.equity_curve: List[Dict] = []
 
-    def generate_trading_days(self, start_year: int = 2015, end_year: int = 2024) -> List[date]:
+    def generate_trading_days(self, start_year: int = 2015, end_year: int = 2026) -> List[date]:
         days = []
         d = date(start_year, 1, 1)
-        end = date(end_year, 12, 31)
+        end = min(date(end_year, 4, 30), date.today())
         while d <= end:
             if d.weekday() < 5:
                 if not self._is_nse_holiday(d):
@@ -298,7 +298,7 @@ class Backtester:
             signal_score=signal_score,
         )
 
-    def run(self, start_year: int = 2015, end_year: int = 2024,
+    def run(self, start_year: int = 2015, end_year: int = 2026,
             min_score: int = 55, max_trades_per_day: int = 3) -> Dict:
         logger.info(f"Starting backtest: {start_year}–{end_year}")
         self.trades = []
