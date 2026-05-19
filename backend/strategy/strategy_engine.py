@@ -95,16 +95,17 @@ class StrategyEngine:
 
         logger.info("=== Strategy Engine: Starting scan ===")
 
-        top_sectors = self.sector_scanner.get_top_sectors(n=3, direction="UP")
-        bottom_sectors = self.sector_scanner.get_top_sectors(n=1, direction="DOWN")
-        all_sectors = self.sector_scanner.get_sector_momentum()
+        top_sectors    = self.sector_scanner.get_top_sectors(n=3, direction="UP")
+        bottom_sectors = self.sector_scanner.get_top_sectors(n=2, direction="DOWN")
+        all_sectors    = self.sector_scanner.get_sector_momentum()
 
         logger.info(f"Top UP sectors: {[s['sector'] for s in top_sectors]}")
+        logger.info(f"Top DOWN sectors: {[s['sector'] for s in bottom_sectors]}")
 
         filtered_stocks = self.stock_filter.filter_stocks(top_sectors + bottom_sectors, kite)
-        logger.info(f"Filtered stocks: {[s['symbol'] for s in filtered_stocks]}")
+        logger.info(f"Filtered stocks ({len(filtered_stocks)}): {[s['symbol'] for s in filtered_stocks]}")
 
-        raw_options = self.options_selector.select_best_options(filtered_stocks, kite, max_picks=5)
+        raw_options = self.options_selector.select_best_options(filtered_stocks, kite, max_picks=6)
         logger.info(f"Raw option picks: {[o['option_symbol'] for o in raw_options]}")
 
         validated_picks = []

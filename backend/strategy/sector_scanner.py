@@ -26,12 +26,12 @@ SECTORAL_INDICES = [
 ]
 
 MOCK_SECTOR_DATA = [
-    {"sector": "NIFTY IT", "change_pct": 1.85, "momentum_score": 92, "trend": "STRONG_UP", "volume_surge": 2.1},
-    {"sector": "NIFTY BANK", "change_pct": 1.20, "momentum_score": 78, "trend": "UP", "volume_surge": 1.6},
-    {"sector": "NIFTY METAL", "change_pct": 0.95, "momentum_score": 71, "trend": "UP", "volume_surge": 1.4},
-    {"sector": "NIFTY AUTO", "change_pct": 0.40, "momentum_score": 55, "trend": "WEAK_UP", "volume_surge": 1.1},
-    {"sector": "NIFTY PHARMA", "change_pct": -0.30, "momentum_score": 42, "trend": "WEAK_DOWN", "volume_surge": 0.9},
-    {"sector": "NIFTY FMCG", "change_pct": -0.75, "momentum_score": 30, "trend": "DOWN", "volume_surge": 0.8},
+    {"sector": "NIFTY IT",     "change_pct": 1.85, "momentum_score": 92, "trend": "STRONG_UP",   "volume_surge": 2.1},
+    {"sector": "NIFTY BANK",   "change_pct": 1.20, "momentum_score": 78, "trend": "UP",          "volume_surge": 1.6},
+    {"sector": "NIFTY METAL",  "change_pct": 0.95, "momentum_score": 71, "trend": "UP",          "volume_surge": 1.4},
+    {"sector": "NIFTY AUTO",   "change_pct": 0.60, "momentum_score": 58, "trend": "UP",          "volume_surge": 1.2},
+    {"sector": "NIFTY PHARMA", "change_pct": 0.45, "momentum_score": 55, "trend": "WEAK_UP",     "volume_surge": 1.1},
+    {"sector": "NIFTY FMCG",   "change_pct": -0.75, "momentum_score": 30, "trend": "DOWN",       "volume_surge": 0.8},
     {"sector": "NIFTY REALTY", "change_pct": -1.10, "momentum_score": 18, "trend": "STRONG_DOWN", "volume_surge": 1.3},
 ]
 
@@ -129,7 +129,10 @@ class SectorScanner:
     def get_top_sectors(self, n: int = 3, direction: str = "UP") -> List[Dict]:
         all_sectors = self.get_sector_momentum()
         if direction == "UP":
-            return [s for s in all_sectors if "UP" in s["trend"]][:n]
+            up = [s for s in all_sectors if "UP" in s["trend"]]
+            # Always return at least top-n even if weak
+            return (up if up else all_sectors)[:n]
         elif direction == "DOWN":
-            return [s for s in all_sectors if "DOWN" in s["trend"]][:n]
+            down = [s for s in all_sectors if "DOWN" in s["trend"]]
+            return (down if down else [])[:n]
         return all_sectors[:n]

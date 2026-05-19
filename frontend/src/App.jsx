@@ -651,49 +651,137 @@ export default function App() {
 
                     {/* Claude-Validated Option Picks */}
                     <div>
-                      <h3 className="text-xs font-semibold text-white mb-3 flex items-center gap-2"><Zap size={13} className="text-yellow-400" /> Claude AI Validated Option Picks</h3>
+                      <h3 className="text-xs font-semibold text-white mb-3 flex items-center gap-2"><Zap size={13} className="text-yellow-400" /> Claude AI Validated Trade Picks — Ready to Execute</h3>
                       {strategyData.picks?.length === 0 && (
-                        <div className="glass rounded-xl p-6 text-center text-slate-500 text-sm">No qualifying picks right now. Run scan during 9:15–10:00 AM for best results.</div>
+                        <div className="glass rounded-xl p-6 text-center">
+                          <p className="text-slate-400 text-sm">No qualifying picks right now.</p>
+                          <p className="text-slate-600 text-xs mt-1">Best results during 9:15–10:00 AM market open. Try clicking Refresh or run during market hours.</p>
+                        </div>
                       )}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {(strategyData.picks || []).map((pick, i) => (
-                          <div key={pick.option_symbol} className={`glass rounded-xl p-4 border ${
-                            pick.option_type === 'CE' ? 'border-emerald-500/30' : 'border-red-500/30'
+                      <div className="flex flex-col gap-4">
+                        {(strategyData.picks || []).map((pick, i) => {
+                          const target = pick.adjusted_target_premium || pick.target_premium;
+                          const sl     = pick.adjusted_sl_premium    || pick.sl_premium;
+                          const rr     = pick.adjusted_risk_reward    || pick.risk_reward;
+                          const slPts  = parseFloat((pick.premium - sl).toFixed(2));
+                          const tgtPts = parseFloat((target - pick.premium).toFixed(2));
+                          const capital = Math.round(pick.premium * pick.lot_size);
+                          const maxLoss = Math.round(slPts * pick.lot_size);
+                          const maxProfit = Math.round(tgtPts * pick.lot_size);
+                          return (
+                          <div key={pick.option_symbol} className={`glass rounded-xl p-5 border ${
+                            pick.option_type === 'CE' ? 'border-emerald-500/40' : 'border-red-500/40'
                           }`}>
-                            <div className="flex items-center justify-between mb-3">
-                              <div>
-                                <TVLink symbol={pick.symbol} className="text-sm font-bold text-white font-mono" />
-                                <div className="text-xs text-slate-500 font-mono">{pick.option_symbol}</div>
+                            {/* Header */}
+                            <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
+                              <div className="flex items-center gap-3">
+                                <span className={`text-lg font-black px-3 py-1 rounded-lg ${
+                                  pick.confidence >= 80 ? 'bg-emerald-500/20 text-emerald-300' :
+                                  pick.confidence >= 65 ? 'bg-blue-500/10 text-blue-300' : 'bg-slate-700 text-slate-300'
+                                }`}>#{i+1}</span>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <TVLink symbol={pick.symbol} className="text-white font-bold text-base hover:text-blue-400" />
+                                    <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                                      pick.option_type === 'CE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                                    }`}>{pick.option_type === 'CE' ? '▲ BUY CALL' : '▼ BUY PUT'}</span>
+                                  </div>
+                                  <div className="text-xs text-slate-400 mt-0.5 font-mono">{pick.option_symbol} · {pick.sector?.replace('NIFTY ','')}</div>
+                                </div>
                               </div>
-                              <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                pick.option_type === 'CE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
-                              }`}>{pick.option_type === 'CE' ? '📈 CALL' : '📉 PUT'}</span>
+                              <div className="text-right">
+                                <div className={`text-2xl font-black ${
+                                  pick.confidence >= 80 ? 'text-emerald-400' : pick.confidence >= 65 ? 'text-blue-400' : 'text-slate-300'
+                                }`}>{pick.confidence}%</div>
+                                <div className="text-xs text-slate-400">AI Confidence</div>
+                              </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                              <div><div className="text-slate-500">Strike</div><div className="text-white font-mono font-bold">{pick.strike}</div></div>
-                              <div><div className="text-slate-500">Premium</div><div className="text-blue-400 font-mono">₹{pick.premium}</div></div>
-                              <div><div className="text-slate-500">Target</div><div className="text-emerald-400 font-mono">₹{pick.adjusted_target_premium || pick.target_premium}</div></div>
-                              <div><div className="text-slate-500">Stop Loss</div><div className="text-red-400 font-mono">₹{pick.adjusted_sl_premium || pick.sl_premium}</div></div>
-                              <div><div className="text-slate-500">R:R</div><div className="text-amber-400 font-bold">{(pick.adjusted_risk_reward || pick.risk_reward).toFixed(2)}x</div></div>
-                              <div><div className="text-slate-500">Max Lots</div><div className="text-white">{pick.max_lots || 1}</div></div>
+                            {/* Action banner */}
+                            <div className={`rounded-lg px-4 py-3 mb-4 font-bold text-sm ${
+                              pick.option_type === 'CE'
+                                ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+                                : 'bg-red-500/10 border border-red-500/30 text-red-300'
+                            }`}>
+                              📌 {pick.action?.replace('_',' ')} {pick.symbol} {pick.strike}{pick.option_type} · Expiry: {pick.expiry}
                             </div>
 
-                            <div className="mb-2">
-                              <div className="flex justify-between text-xs text-slate-500 mb-1"><span>AI Confidence</span><span className="text-blue-400">{pick.confidence}%</span></div>
-                              <div className="w-full bg-slate-800 rounded-full h-1.5"><div className="h-1.5 rounded-full bg-blue-500" style={{ width: `${pick.confidence}%` }} /></div>
+                            {/* Key numbers */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                              <div className="bg-slate-800/60 rounded-lg p-3">
+                                <div className="text-xs text-slate-400 mb-1">Underlying Price</div>
+                                <div className="text-sm font-bold text-white">₹{pick.underlying_price?.toFixed(2)}</div>
+                              </div>
+                              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                                <div className="text-xs text-yellow-400 mb-1">Strike Price</div>
+                                <div className="text-sm font-bold text-yellow-300">₹{pick.strike}</div>
+                              </div>
+                              <div className="bg-slate-800/60 rounded-lg p-3">
+                                <div className="text-xs text-slate-400 mb-1">Entry Premium</div>
+                                <div className="text-sm font-bold text-blue-300">₹{pick.premium}</div>
+                              </div>
+                              <div className="bg-slate-800/60 rounded-lg p-3">
+                                <div className="text-xs text-slate-400 mb-1">Lot Size</div>
+                                <div className="text-sm font-bold text-white">{pick.lot_size?.toLocaleString()}</div>
+                              </div>
                             </div>
 
-                            <p className="text-xs text-slate-400 italic leading-relaxed mb-2">"{pick.reasoning}"</p>
-                            <p className="text-xs text-amber-400/80 leading-relaxed">💡 {pick.improvement}</p>
+                            {/* SL / RR / Target — the most important 3 boxes */}
+                            <div className="grid grid-cols-3 gap-3 mb-4">
+                              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-center">
+                                <div className="text-xs text-red-400 mb-1 font-semibold">🛑 STOP LOSS</div>
+                                <div className="text-base font-black text-red-300">₹{sl}</div>
+                                <div className="text-xs text-red-400/70">-₹{slPts} / unit</div>
+                                <div className="text-xs text-red-400 font-semibold mt-1">Max Loss: ₹{maxLoss.toLocaleString()}</div>
+                              </div>
+                              <div className="bg-slate-800/60 border border-slate-700 rounded-lg p-3 text-center">
+                                <div className="text-xs text-slate-400 mb-1 font-semibold">📊 R:R RATIO</div>
+                                <div className="text-base font-black text-white">{parseFloat(rr).toFixed(2)} : 1</div>
+                                <div className="text-xs text-slate-500">Risk / Reward</div>
+                                <div className="text-xs text-slate-400 font-semibold mt-1">Capital: ₹{capital.toLocaleString()}</div>
+                              </div>
+                              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-center">
+                                <div className="text-xs text-emerald-400 mb-1 font-semibold">🎯 TARGET</div>
+                                <div className="text-base font-black text-emerald-300">₹{target}</div>
+                                <div className="text-xs text-emerald-400/70">+₹{tgtPts} / unit</div>
+                                <div className="text-xs text-emerald-400 font-semibold mt-1">Max Profit: ₹{maxProfit.toLocaleString()}</div>
+                              </div>
+                            </div>
 
-                            <div className="mt-2 pt-2 border-t border-slate-700 flex items-center gap-2 text-xs text-slate-500">
-                              <span>Lot: {pick.lot_size}</span>
-                              <span>·</span>
-                              <span>Cost/lot: ₹{pick.cost_per_lot?.toLocaleString('en-IN')}</span>
+                            {/* Confidence bar */}
+                            <div className="mb-3">
+                              <div className="flex justify-between text-xs text-slate-500 mb-1">
+                                <span>AI Confidence</span>
+                                <span className={pick.confidence >= 80 ? 'text-emerald-400' : 'text-blue-400'}>{pick.confidence}%</span>
+                              </div>
+                              <div className="w-full bg-slate-800 rounded-full h-1.5">
+                                <div className={`h-1.5 rounded-full ${
+                                  pick.confidence >= 80 ? 'bg-emerald-500' : 'bg-blue-500'
+                                }`} style={{ width: `${pick.confidence}%` }} />
+                              </div>
+                            </div>
+
+                            {/* Supporting data */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                              <div className="text-xs text-slate-400">Delivery %: <span className="text-white font-semibold">{pick.delivery_pct?.toFixed(1) || '—'}%</span></div>
+                              <div className="text-xs text-slate-400">Turnover: <span className="text-white font-semibold">₹{pick.turnover?.toFixed(0) || '—'}Cr</span></div>
+                              <div className="text-xs text-slate-400">Move: <span className={pick.change_pct >= 0 ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold'}>{pick.change_pct > 0 ? '+' : ''}{pick.change_pct?.toFixed(2)}%</span></div>
+                              <div className="text-xs text-slate-400">5-min Low: <span className={pick['5min_low_hold'] ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold'}>{pick['5min_low_hold'] ? '✅ Holding' : '❌ Broken'}</span></div>
+                            </div>
+
+                            {/* AI reasoning */}
+                            <div className="pt-3 border-t border-slate-800">
+                              <p className="text-xs text-slate-400 italic leading-relaxed mb-1">💬 {pick.reasoning}</p>
+                              <p className="text-xs text-amber-400/80 leading-relaxed">💡 {pick.improvement}</p>
+                            </div>
+
+                            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                              <span>⏰ Entry: 9:20–10:00 AM · Exit: by 3:00 PM</span>
+                              <span className="text-xs font-medium text-slate-400">Max Lots: {pick.max_lots || 1}</span>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </>
@@ -719,7 +807,7 @@ export default function App() {
                         </select>
                         <span className="text-slate-500">To</span>
                         <select value={btYears[1]} onChange={e => setBtYears([btYears[0], +e.target.value])} className="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white text-xs">
-                          {[2020,2021,2022,2023,2024].map(y => <option key={y} value={y}>{y}</option>)}
+                          {[2020,2021,2022,2023,2024,2025,2026].map(y => <option key={y} value={y}>{y}</option>)}
                         </select>
                       </div>
                       <button

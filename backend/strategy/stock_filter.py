@@ -34,23 +34,43 @@ MF_HEAVY_STOCKS = {"HINDUNILVR", "ITC", "TCS", "INFY", "HDFCBANK", "RELIANCE", "
 
 MOCK_STOCKS = {
     "NIFTY IT": [
-        {"symbol": "COFORGE", "turnover": 450.2, "delivery_pct": 62.5, "change_pct": 2.1, "mf_heavy": False},
-        {"symbol": "PERSISTENT", "turnover": 380.5, "delivery_pct": 58.3, "change_pct": 1.8, "mf_heavy": False},
-        {"symbol": "LTIM", "turnover": 290.1, "delivery_pct": 45.2, "change_pct": 1.5, "mf_heavy": False},
-        {"symbol": "TECHM", "turnover": 210.8, "delivery_pct": 38.1, "change_pct": 0.9, "mf_heavy": False},
-        {"symbol": "TCS", "turnover": 1200.0, "delivery_pct": 28.5, "change_pct": 0.6, "mf_heavy": True},
-        {"symbol": "INFY", "turnover": 980.5, "delivery_pct": 25.3, "change_pct": 0.4, "mf_heavy": True},
+        {"symbol": "COFORGE",    "turnover": 450.2, "delivery_pct": 62.5, "change_pct": 2.1, "mf_heavy": False, "last_price": 1850.0, "open": 1820.0, "low": 1815.0, "high": 1870.0},
+        {"symbol": "PERSISTENT", "turnover": 380.5, "delivery_pct": 58.3, "change_pct": 1.8, "mf_heavy": False, "last_price": 2210.0, "open": 2180.0, "low": 2175.0, "high": 2230.0},
+        {"symbol": "LTIM",       "turnover": 290.1, "delivery_pct": 55.2, "change_pct": 1.5, "mf_heavy": False, "last_price": 3120.0, "open": 3080.0, "low": 3070.0, "high": 3140.0},
+        {"symbol": "TECHM",      "turnover": 210.8, "delivery_pct": 48.1, "change_pct": 1.2, "mf_heavy": False, "last_price": 1460.0, "open": 1440.0, "low": 1435.0, "high": 1475.0},
+        {"symbol": "HCLTECH",    "turnover": 260.5, "delivery_pct": 50.4, "change_pct": 1.4, "mf_heavy": False, "last_price": 1580.0, "open": 1555.0, "low": 1550.0, "high": 1595.0},
     ],
     "NIFTY BANK": [
-        {"symbol": "FEDERALBNK", "turnover": 320.3, "delivery_pct": 55.1, "change_pct": 1.9, "mf_heavy": False},
-        {"symbol": "BANDHANBNK", "turnover": 280.7, "delivery_pct": 52.4, "change_pct": 1.6, "mf_heavy": False},
-        {"symbol": "AXISBANK", "turnover": 450.2, "delivery_pct": 41.2, "change_pct": 1.2, "mf_heavy": False},
-        {"symbol": "HDFCBANK", "turnover": 1500.0, "delivery_pct": 22.3, "change_pct": 0.5, "mf_heavy": True},
+        {"symbol": "FEDERALBNK",  "turnover": 320.3, "delivery_pct": 55.1, "change_pct": 1.9, "mf_heavy": False, "last_price": 198.0,  "open": 194.0,  "low": 193.0,  "high": 201.0},
+        {"symbol": "BANDHANBNK",  "turnover": 280.7, "delivery_pct": 52.4, "change_pct": 1.6, "mf_heavy": False, "last_price": 188.0,  "open": 185.0,  "low": 184.0,  "high": 192.0},
+        {"symbol": "AXISBANK",    "turnover": 450.2, "delivery_pct": 51.2, "change_pct": 1.3, "mf_heavy": False, "last_price": 1125.0, "open": 1110.0, "low": 1108.0, "high": 1138.0},
+        {"symbol": "INDUSINDBK",  "turnover": 310.5, "delivery_pct": 48.7, "change_pct": 1.5, "mf_heavy": False, "last_price": 960.0,  "open": 945.0,  "low": 942.0,  "high": 972.0},
     ],
     "NIFTY METAL": [
-        {"symbol": "NATIONALUM", "turnover": 180.5, "delivery_pct": 68.2, "change_pct": 2.3, "mf_heavy": False},
-        {"symbol": "NMDC", "turnover": 220.3, "delivery_pct": 60.5, "change_pct": 1.7, "mf_heavy": False},
-        {"symbol": "SAIL", "turnover": 190.8, "delivery_pct": 55.3, "change_pct": 1.4, "mf_heavy": False},
+        {"symbol": "NATIONALUM", "turnover": 280.5, "delivery_pct": 68.2, "change_pct": 2.3, "mf_heavy": False, "last_price": 218.0, "open": 213.0, "low": 212.0, "high": 222.0},
+        {"symbol": "NMDC",       "turnover": 220.3, "delivery_pct": 60.5, "change_pct": 1.7, "mf_heavy": False, "last_price": 242.0, "open": 238.0, "low": 237.0, "high": 246.0},
+        {"symbol": "SAIL",       "turnover": 190.8, "delivery_pct": 55.3, "change_pct": 1.4, "mf_heavy": False, "last_price": 132.0, "open": 130.0, "low": 129.0, "high": 134.0},
+        {"symbol": "HINDALCO",   "turnover": 310.2, "delivery_pct": 58.1, "change_pct": 1.6, "mf_heavy": False, "last_price": 620.0, "open": 610.0, "low": 608.0, "high": 628.0},
+    ],
+    "NIFTY AUTO": [
+        {"symbol": "TATAMOTORS", "turnover": 420.5, "delivery_pct": 52.3, "change_pct": 1.8, "mf_heavy": False, "last_price": 780.0,  "open": 766.0,  "low": 764.0,  "high": 792.0},
+        {"symbol": "M&M",        "turnover": 350.3, "delivery_pct": 56.8, "change_pct": 1.5, "mf_heavy": False, "last_price": 2850.0, "open": 2808.0, "low": 2805.0, "high": 2875.0},
+        {"symbol": "BAJAJ-AUTO", "turnover": 280.1, "delivery_pct": 60.2, "change_pct": 1.3, "mf_heavy": False, "last_price": 9200.0, "open": 9080.0, "low": 9070.0, "high": 9280.0},
+        {"symbol": "EICHERMOT",  "turnover": 210.8, "delivery_pct": 54.4, "change_pct": 1.1, "mf_heavy": False, "last_price": 4850.0, "open": 4796.0, "low": 4790.0, "high": 4890.0},
+    ],
+    "NIFTY PHARMA": [
+        {"symbol": "SUNPHARMA",  "turnover": 380.5, "delivery_pct": 61.2, "change_pct": 1.6, "mf_heavy": False, "last_price": 1680.0, "open": 1653.0, "low": 1650.0, "high": 1695.0},
+        {"symbol": "DRREDDY",    "turnover": 290.3, "delivery_pct": 58.5, "change_pct": 1.4, "mf_heavy": False, "last_price": 6200.0, "open": 6113.0, "low": 6110.0, "high": 6260.0},
+        {"symbol": "CIPLA",      "turnover": 240.8, "delivery_pct": 55.3, "change_pct": 1.2, "mf_heavy": False, "last_price": 1490.0, "open": 1472.0, "low": 1470.0, "high": 1505.0},
+    ],
+    "NIFTY REALTY": [
+        {"symbol": "DLF",         "turnover": 310.2, "delivery_pct": 58.4, "change_pct": -1.5, "mf_heavy": False, "last_price": 820.0,  "open": 833.0,  "low": 815.0,  "high": 835.0},
+        {"symbol": "GODREJPROP",  "turnover": 280.5, "delivery_pct": 55.1, "change_pct": -1.3, "mf_heavy": False, "last_price": 2680.0, "open": 2715.0, "low": 2670.0, "high": 2720.0},
+        {"symbol": "OBEROIRLTY",  "turnover": 190.3, "delivery_pct": 52.8, "change_pct": -1.1, "mf_heavy": False, "last_price": 1840.0, "open": 1860.0, "low": 1835.0, "high": 1865.0},
+    ],
+    "NIFTY FMCG": [
+        {"symbol": "DABUR",  "turnover": 180.5, "delivery_pct": 54.2, "change_pct": -0.9, "mf_heavy": False, "last_price": 540.0,  "open": 545.0,  "low": 537.0,  "high": 548.0},
+        {"symbol": "MARICO", "turnover": 160.3, "delivery_pct": 51.5, "change_pct": -0.7, "mf_heavy": False, "last_price": 620.0,  "open": 624.0,  "low": 617.0,  "high": 627.0},
     ],
 }
 
@@ -130,55 +150,75 @@ class StockFilter:
             if s.get("mf_heavy", False):
                 continue
 
-            if s.get("change_pct", 0) < 0.3:
+            chg = s.get("change_pct", 0)
+            trend = s.get("sector_trend", "UP")
+            is_pe = "DOWN" in trend
+
+            # For CE: need positive change. For PE: need negative change.
+            if not is_pe and chg < 0.3:
+                continue
+            if is_pe and chg > -0.3:
                 continue
 
             if s.get("turnover", 0) >= 200:
                 score += 30
-                reasons.append(f"High turnover Rs{s['turnover']:.0f}Cr")
+                reasons.append(f"High turnover ₹{s['turnover']:.0f}Cr")
             elif s.get("turnover", 0) >= 100:
-                score += 15
-                reasons.append(f"Moderate turnover Rs{s['turnover']:.0f}Cr")
+                score += 20
+                reasons.append(f"Good turnover ₹{s['turnover']:.0f}Cr")
+            elif s.get("turnover", 0) >= 50:
+                score += 10
+                reasons.append(f"Moderate turnover ₹{s['turnover']:.0f}Cr")
 
             if s.get("delivery_pct", 0) >= 50:
                 score += 30
-                reasons.append(f"Strong delivery {s['delivery_pct']:.1f}% (institutional buying)")
-            elif s.get("delivery_pct", 0) >= 35:
-                score += 15
+                reasons.append(f"Strong delivery {s['delivery_pct']:.1f}% — institutional signal")
+            elif s.get("delivery_pct", 0) >= 40:
+                score += 20
+                reasons.append(f"Good delivery {s['delivery_pct']:.1f}%")
+            elif s.get("delivery_pct", 0) >= 30:
+                score += 10
                 reasons.append(f"Decent delivery {s['delivery_pct']:.1f}%")
 
-            if s.get("change_pct", 0) >= 1.5:
+            if abs(chg) >= 1.5:
                 score += 25
-                reasons.append(f"Strong momentum +{s['change_pct']:.1f}%")
-            elif s.get("change_pct", 0) >= 0.5:
-                score += 12
+                reasons.append(f"Strong move {chg:+.1f}%")
+            elif abs(chg) >= 0.8:
+                score += 15
+                reasons.append(f"Good move {chg:+.1f}%")
+            elif abs(chg) >= 0.3:
+                score += 8
 
             score += min(int(s.get("sector_momentum", 50) / 5), 15)
 
             s["filter_score"] = score
             s["filter_reasons"] = reasons
             s["5min_low_hold"] = self._check_5min_low_hold(s)
-            if not s["5min_low_hold"]:
-                continue
 
-            if score >= 40:
+            if score >= 30:
                 results.append(s)
 
         results.sort(key=lambda x: x["filter_score"], reverse=True)
-        return results[:5]
+        return results[:6]
 
     def _check_5min_low_hold(self, stock: Dict) -> bool:
         """
         Rule 3: First 5-min candle low must hold.
-        In paper mode, simulate: if current price > open and change_pct > 0, low is holding.
-        In live mode: compare current price vs first 5-min candle low fetched from kite.
+        For CE (bullish): current price > first candle low.
+        For PE (bearish): current price < first candle high.
         """
+        trend = stock.get("sector_trend", "UP")
+        is_pe = "DOWN" in trend
         if self.paper_trade:
-            return stock.get("change_pct", 0) > 0.2
+            chg = stock.get("change_pct", 0)
+            return abs(chg) > 0.3
         open_price = stock.get("open", 0)
-        low_price = stock.get("low", 0)
+        low_price  = stock.get("low", 0)
+        high_price = stock.get("high", 0)
         last_price = stock.get("last_price", 0)
         if open_price == 0:
-            return False
+            return True
+        if is_pe:
+            return last_price < max(open_price, high_price)
         first_candle_low = min(open_price, low_price)
         return last_price > first_candle_low
