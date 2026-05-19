@@ -5,8 +5,9 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 from typing import Optional, List
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse, HTMLResponse
 from pydantic import BaseModel
 
 from config.settings import settings
@@ -168,6 +169,34 @@ def health():
 @app.get("/auth/login-url")
 def get_login_url():
     return {"login_url": auth.get_login_url()}
+
+@app.get("/auth/callback")
+def auth_callback(request: Request):
+    request_token = request.query_params.get("request_token")
+    status = request.query_params.get("status", "")
+    if status == "cancelled" or not request_token:
+        return HTMLResponse(
+            "<html><body style='font-family:sans-serif;text-align:center;padding:40px'>"
+            "<h2 style='color:red'>Login Cancelled or Failed</h2>"
+            "<p>Close this window and try again.</p></body></html>",
+            status_code=400
+        )
+    try:
+        result = auth.generate_session(request_token)
+        market_data.kite = auth.kite
+        executor.kite = auth.kite
+        logger.info(f"Zerodha session created via callback for user: {result.get('user_id', 'unknown')}")
+        frontend_url = settings.FRONTEND_URL.rstrip("/")
+        return RedirectResponse(url=f"{frontend_url}?auth=success", status_code=302)
+    except Exception as e:
+        logger.error(f"Auth callback failed: {e}")
+        return HTMLResponse(
+            f"<html><body style='font-family:sans-serif;text-align:center;padding:40px'>"
+            f"<h2 style='color:red'>Authentication Failed</h2>"
+            f"<p>{str(e)}</p>"
+            f"<p>Close this window and try again.</p></body></html>",
+            status_code=400
+        )
 
 @app.post("/auth/session")
 def create_session(req: TokenRequest):
